@@ -8,7 +8,6 @@ using System.Linq;
 
 public class CustomTerrain : MonoBehaviour
 {
-
     public Vector2 randomHeightRange = new Vector2(0, 0.1f);
     public Texture2D heightMapImage;
     public Vector3 heightMapScale = new Vector3(1, 1, 1);
@@ -42,6 +41,20 @@ public class CustomTerrain : MonoBehaviour
 
     public List<PerlinParameters> perlinParameters = new List<PerlinParameters>() { new PerlinParameters() };
 
+    //Voronoi
+    public float voronoiFallOff = 0.2f;
+    public float voronoiDropOff = 0.6f;
+    public float voronoiMinHeight = 0.25f;
+    public float voronoiMaxHeight = 0.4f;
+    public int voronoiPeaks = 9;
+    public enum VoronoiType
+    {
+        Linear = 0, Power = 1, Combined = 2,
+        SinPow = 3
+    }
+    public VoronoiType voronoiType = VoronoiType.Linear;
+
+
     public Terrain terrain;
     public TerrainData terrainData;
 
@@ -60,33 +73,60 @@ public class CustomTerrain : MonoBehaviour
     public void Voronoi()
     {
         var heightMap = GetHeightMap();
-        float fallOff = 0.2f;
-        float dropOff = 0.6f;
-        Vector3 peak = new Vector3(terrainData.heightmapResolution / 2, 0.2f, terrainData.heightmapResolution / 2);
-        //Vector3 peak = new Vector3(
-        //    UnityEngine.Random.Range(0, terrainData.heightmapResolution),
-        //    UnityEngine.Random.Range(0,1f),
-        //    UnityEngine.Random.Range(0, terrainData.heightmapResolution)
-        //    );
 
-        heightMap[(int)peak.x, (int)peak.z] = peak.y;
-
-        //Calculate slopes
-        Vector2 peakLocation = new Vector2(peak.x, peak.z);
-        float maxDistance = Vector2.Distance(new Vector2(0, 0),
-            new Vector2(terrainData.heightmapResolution,
-            terrainData.heightmapResolution));
-
-        for (int y = 0; y < terrainData.heightmapResolution; y++)
+        for (int p = 0; p < voronoiPeaks; p++)
         {
-            for (int x = 0; x < terrainData.heightmapResolution; x++)
+
+            Vector3 peak = new Vector3(
+                 UnityEngine.Random.Range(0, terrainData.heightmapResolution),
+                 UnityEngine.Random.Range(voronoiMinHeight, voronoiMaxHeight),
+                 UnityEngine.Random.Range(0, terrainData.heightmapResolution)
+                 );
+
+
+            if (heightMap[(int)peak.x, (int)peak.z] < peak.y)
+                heightMap[(int)peak.x, (int)peak.z] = peak.y;
+            else
+                continue; //prevent low peaks creating depressions inside mountains, if peek is below current height dont apply peaj to heightmap
+
+            //Calculate slopes
+            Vector2 peakLocation = new Vector2(peak.x, peak.z);
+            float maxDistance = Vector2.Distance(new Vector2(0, 0),
+                new Vector2(terrainData.heightmapResolution,
+                terrainData.heightmapResolution));
+
+            for (int y = 0; y < terrainData.heightmapResolution; y++)
             {
-                if (!(x == peakLocation.x && y == peakLocation.y))
+                for (int x = 0; x < terrainData.heightmapResolution; x++)
                 {
-                    float distanceToPeak = Vector2.Distance(peakLocation, new Vector2(x, y)) / maxDistance;
-                    float h = peak.y - distanceToPeak * fallOff - Mathf.Pow(distanceToPeak, dropOff);
-                    //float h = peak.y - Mathf.Sin(distanceToPeak * 100) * 0.1f;
-                    heightMap[x, y] = h;
+                    if (!(x == peakLocation.x && y == peakLocation.y))
+                    {
+                        float distanceToPeak = Vector2.Distance(peakLocation, new Vector2(x, y)) / maxDistance;
+
+                        float h;
+
+                        switch (voronoiType)
+                        {
+                            case VoronoiType.Combined:
+                                h = peak.y - distanceToPeak * voronoiFallOff - Mathf.Pow(distanceToPeak, voronoiDropOff);//combined
+                                break;
+                            case VoronoiType.Power:
+                                h = peak.y - Mathf.Pow(distanceToPeak, voronoiDropOff) * voronoiFallOff;//power
+                                break;
+                            case VoronoiType.SinPow:
+                                h = peak.y - Mathf.Pow(distanceToPeak * 3, voronoiFallOff) -
+                                    Mathf.Sin(distanceToPeak * 2 * Mathf.PI) / voronoiDropOff;//sinpow
+                                break;
+                            case VoronoiType.Linear:
+                            default:
+                                h = peak.y - distanceToPeak * voronoiFallOff;//linear
+                                break;
+                        }
+
+                        //new peak data will not cancel out previous height data
+                        if (heightMap[x, y] < h)
+                            heightMap[x, y] = h;
+                    }
                 }
             }
         }
