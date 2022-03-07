@@ -6,19 +6,38 @@ using System.Linq;
 
 [ExecuteInEditMode]
 
-public class CustomTerrain : MonoBehaviour {
-    
-    public Vector2 randomHeightRange = new Vector2(0,0.1f);
+public class CustomTerrain : MonoBehaviour
+{
+
+    public Vector2 randomHeightRange = new Vector2(0, 0.1f);
     public Texture2D heightMapImage;
     public Vector3 heightMapScale = new Vector3(1, 1, 1);
+
+    //PERLIN NOISE
+    public float perlinXScale = 0.01f;
+    public float perlinYScale = 0.01f;
 
 
     public Terrain terrain;
     public TerrainData terrainData;
 
+    public void Perlin()
+    {
+        float[,] heightMap = terrainData.GetHeights(0, 0, terrainData.heightmapResolution,
+                                                         terrainData.heightmapResolution);
+        for (int y = 0; y < terrainData.heightmapResolution; y++)
+        {
+            for (int x = 0; x < terrainData.heightmapResolution; x++)
+            {
+                heightMap[x, y] = Mathf.PerlinNoise(x * perlinXScale, y * perlinYScale);
+            }
+        }
+        terrainData.SetHeights(0, 0, heightMap);
+    }
+
     public void RandomTerrain()
     {
-        float[,] heightMap = terrainData.GetHeights(0, 0, terrainData.heightmapResolution, 
+        float[,] heightMap = terrainData.GetHeights(0, 0, terrainData.heightmapResolution,
                                                           terrainData.heightmapResolution);
         for (int x = 0; x < terrainData.heightmapResolution; x++)
         {
@@ -28,7 +47,7 @@ public class CustomTerrain : MonoBehaviour {
             }
         }
         terrainData.SetHeights(0, 0, heightMap);
-    
+
     }
 
     public void LoadTexture()
@@ -40,8 +59,8 @@ public class CustomTerrain : MonoBehaviour {
         {
             for (int z = 0; z < terrainData.heightmapResolution; z++)
             {
-                heightMap[x, z] = heightMapImage.GetPixel((int)(x * heightMapScale.x), 
-                                                          (int)(z * heightMapScale.z)).grayscale 
+                heightMap[x, z] = heightMapImage.GetPixel((int)(x * heightMapScale.x),
+                                                          (int)(z * heightMapScale.z)).grayscale
                                                             * heightMapScale.y;
             }
         }
@@ -51,7 +70,7 @@ public class CustomTerrain : MonoBehaviour {
     public void ResetTerrain()
     {
         float[,] heightMap;
-        heightMap = new float[terrainData.heightmapResolution,terrainData.heightmapResolution];
+        heightMap = new float[terrainData.heightmapResolution, terrainData.heightmapResolution];
         for (int x = 0; x < terrainData.heightmapResolution; x++)
         {
             for (int z = 0; z < terrainData.heightmapResolution; z++)
@@ -106,12 +125,14 @@ public class CustomTerrain : MonoBehaviour {
     }
 
     // Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 }
