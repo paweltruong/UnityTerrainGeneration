@@ -57,6 +57,40 @@ public class CustomTerrain : MonoBehaviour
         }
     }
 
+    public void Voronoi()
+    {
+        var heightMap = GetHeightMap();
+        float fallOff = 0.5f;
+        Vector3 peak = new Vector3(terrainData.heightmapResolution / 2, 0.2f, terrainData.heightmapResolution / 2);
+        //Vector3 peak = new Vector3(
+        //    UnityEngine.Random.Range(0, terrainData.heightmapResolution),
+        //    UnityEngine.Random.Range(0,1f),
+        //    UnityEngine.Random.Range(0, terrainData.heightmapResolution)
+        //    );
+
+        heightMap[(int)peak.x, (int)peak.z] = peak.y;
+
+        //Calculate slopes
+        Vector2 peakLocation = new Vector2(peak.x, peak.z);
+        float maxDistance = Vector2.Distance(new Vector2(0, 0),
+            new Vector2(terrainData.heightmapResolution,
+            terrainData.heightmapResolution));
+
+        for (int y = 0; y < terrainData.heightmapResolution; y++)
+        {
+            for (int x = 0; x < terrainData.heightmapResolution; x++)
+            {
+                if (!(x == peakLocation.x && y == peakLocation.y))
+                {
+                    float distanceToPeak = Vector2.Distance(peakLocation, new Vector2(x, y)) * fallOff;
+                    heightMap[x, y] = peak.y - (distanceToPeak / maxDistance);
+                }
+            }
+        }
+
+        terrainData.SetHeights(0, 0, heightMap);
+    }
+
     public void Perlin()
     {
         float[,] heightMap = GetHeightMap();
@@ -115,7 +149,7 @@ public class CustomTerrain : MonoBehaviour
             }
         }
 
-        if(keptPerlinParameters.Count == 0) //don't want to keep any
+        if (keptPerlinParameters.Count == 0) //don't want to keep any
         {
             keptPerlinParameters.Add(perlinParameters[0]);//add at least 1
         }

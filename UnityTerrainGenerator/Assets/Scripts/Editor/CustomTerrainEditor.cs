@@ -29,6 +29,7 @@ public class CustomTerrainEditor : Editor {
     bool showLoadHeights = false;
     bool showPerlinNoise = false;
     bool showMultiplePerlin = false;
+    bool showVoronoi = false;
 
     void OnEnable()
     {
@@ -126,6 +127,16 @@ public class CustomTerrainEditor : Editor {
             if (GUILayout.Button("Perlin"))
             {
                 terrain.Perlin();
+            }
+        }
+
+        //Show Voronoi
+        showVoronoi = EditorGUILayout.Foldout(showVoronoi, "Voronoi");
+        if (showVoronoi)
+        {
+            if (GUILayout.Button("Voronoi"))
+            {
+                terrain.Voronoi();
             }
         }
 
