@@ -13,6 +13,8 @@ public class CustomTerrainEditor : Editor {
     SerializedProperty heightMapImage;
     SerializedProperty perlinXScale;
     SerializedProperty perlinYScale;
+    SerializedProperty perlinOffsetX;
+    SerializedProperty perlinOffsetY;
 
     //fold outs ------------
     bool showRandom = false;
@@ -26,6 +28,8 @@ public class CustomTerrainEditor : Editor {
         heightMapImage = serializedObject.FindProperty("heightMapImage");
         perlinXScale = serializedObject.FindProperty("perlinXScale");
         perlinYScale = serializedObject.FindProperty("perlinYScale");
+        perlinOffsetX = serializedObject.FindProperty("perlinOffsetX");
+        perlinOffsetY = serializedObject.FindProperty("perlinOffsetY");
     }
 
     public override void OnInspectorGUI()
@@ -64,8 +68,10 @@ public class CustomTerrainEditor : Editor {
         {
             EditorGUILayout.LabelField("",GUI.skin.horizontalSlider);
             GUILayout.Label("Perlin Noise", EditorStyles.boldLabel);
-            EditorGUILayout.Slider(perlinXScale, 0, 1, new GUIContent("X Scale"));
-            EditorGUILayout.Slider(perlinYScale, 0, 1, new GUIContent("Y Scale"));
+            EditorGUILayout.Slider(perlinXScale, 0, .02f, new GUIContent("X Scale"));
+            EditorGUILayout.Slider(perlinYScale, 0, .02f, new GUIContent("Y Scale"));
+            EditorGUILayout.IntSlider(perlinOffsetX, 0, 10000, new GUIContent("Offset X"));
+            EditorGUILayout.IntSlider(perlinOffsetY, 0, 10000, new GUIContent("Offset Y"));
 
             if (GUILayout.Button("Perlin"))
             {
