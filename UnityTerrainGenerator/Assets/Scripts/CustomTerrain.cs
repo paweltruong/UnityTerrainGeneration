@@ -60,7 +60,8 @@ public class CustomTerrain : MonoBehaviour
     public void Voronoi()
     {
         var heightMap = GetHeightMap();
-        float fallOff = 0.5f;
+        float fallOff = 0.2f;
+        float dropOff = 0.6f;
         Vector3 peak = new Vector3(terrainData.heightmapResolution / 2, 0.2f, terrainData.heightmapResolution / 2);
         //Vector3 peak = new Vector3(
         //    UnityEngine.Random.Range(0, terrainData.heightmapResolution),
@@ -82,8 +83,10 @@ public class CustomTerrain : MonoBehaviour
             {
                 if (!(x == peakLocation.x && y == peakLocation.y))
                 {
-                    float distanceToPeak = Vector2.Distance(peakLocation, new Vector2(x, y)) * fallOff;
-                    heightMap[x, y] = peak.y - (distanceToPeak / maxDistance);
+                    float distanceToPeak = Vector2.Distance(peakLocation, new Vector2(x, y)) / maxDistance;
+                    float h = peak.y - distanceToPeak * fallOff - Mathf.Pow(distanceToPeak, dropOff);
+                    //float h = peak.y - Mathf.Sin(distanceToPeak * 100) * 0.1f;
+                    heightMap[x, y] = h;
                 }
             }
         }
