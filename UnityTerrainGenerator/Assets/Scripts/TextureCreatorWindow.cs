@@ -8,13 +8,13 @@ public class TextureCreatorWindow : EditorWindow
 {
     int textureResolution = 513;
     string filename = "myProceduralTexture";
-    float perlinXScale;
-    float perlinYScale;
-    int perlinOctaves;
-    float perlinPersistance;
-    float perlinHeightScale;
-    int perlinOffsetX;
-    int perlinOffsetY;
+    float perlinXScale = 0.001f;
+    float perlinYScale = 0.001f;
+    int perlinOctaves = 5;
+    float perlinPersistance = 1.5f;
+    float perlinHeightScale = 0.9f;
+    int perlinOffsetX = 1000;
+    int perlinOffsetY = 200;
     bool alphaToggle = false;
     bool seamlessToggle = false;
     bool mapToggle = false;//remap color values, to tweak grayscale
@@ -137,7 +137,9 @@ public class TextureCreatorWindow : EditorWindow
         GUILayout.FlexibleSpace();
         if (GUILayout.Button("Save", GUILayout.Width(wSize)))
         {
-
+            byte[] bytes = pTexture.EncodeToPNG();
+            System.IO.Directory.CreateDirectory(Application.dataPath + "/SavedTextures");
+            File.WriteAllBytes(Application.dataPath + "/SavedTextures/" + filename + ".png", bytes);
         }
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
