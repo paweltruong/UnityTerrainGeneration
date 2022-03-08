@@ -116,6 +116,7 @@ public class CustomTerrain : MonoBehaviour
 
     public void SplatMaps()
     {
+        //Create terrain brushes
         TerrainLayer[] newSplatPrototypes;
         newSplatPrototypes = new TerrainLayer[splatHeights.Count];
         int splatIndex = 0;
@@ -131,6 +132,8 @@ public class CustomTerrain : MonoBehaviour
         }
         terrainData.terrainLayers = newSplatPrototypes;
 
+
+        //Apply texture based on height
         var heightMap = GetHeightMap(true);
         float[,,] splatMapData = new float[
             terrainData.alphamapWidth,
@@ -144,8 +147,9 @@ public class CustomTerrain : MonoBehaviour
                 float[] splat = new float[terrainData.alphamapLayers];
                 for (int i = 0; i < splatHeights.Count; ++i)
                 {
-                    float thisHeightStart = splatHeights[i].minHeight;
-                    float thisHeightStop = splatHeights[i].maxHeight;
+                    float offset = 0.01f;
+                    float thisHeightStart = splatHeights[i].minHeight - offset;
+                    float thisHeightStop = splatHeights[i].maxHeight + offset;
                     if (heightMap[x, y] >= thisHeightStart && heightMap[x, y] <= thisHeightStop)
                     {
                         splat[i] = 1;
