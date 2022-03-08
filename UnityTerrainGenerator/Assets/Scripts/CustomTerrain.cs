@@ -41,6 +41,19 @@ public class CustomTerrain : MonoBehaviour
 
     public List<PerlinParameters> perlinParameters = new List<PerlinParameters>() { new PerlinParameters() };
 
+    //Splatmaps
+    [System.Serializable]
+    public class SplatHeights
+    {
+        public Texture2D texture = null;
+        public float minHeight = 0.1f;
+        public float maxHeight = 0.2f;
+        public Vector2 tileOffset = Vector2.zero;
+        public Vector2 tileSize = new Vector2(50, 50);
+        public bool remove = false;
+    }
+    public List<SplatHeights> splatHeights = new List<SplatHeights>() { new SplatHeights() };
+
     //Voronoi
     public float voronoiFallOff = 0.2f;
     public float voronoiDropOff = 0.6f;
@@ -76,6 +89,47 @@ public class CustomTerrain : MonoBehaviour
         {
             return new float[terrainData.heightmapResolution, terrainData.heightmapResolution];
         }
+    }
+
+    public void AddNewSplatHeight()
+    {
+        splatHeights.Add(new SplatHeights());
+    }
+
+    public void RemoveSplatHeight()
+    {
+        var keptSplatHeights = new List<SplatHeights>();
+        for (int i = 0; i < perlinParameters.Count; i++)
+        {
+            if (!perlinParameters[i].remove)
+            {
+                keptSplatHeights.Add(splatHeights[i]);
+            }
+        }
+
+        if (keptSplatHeights.Count == 0) //don't want to keep any
+        {
+            keptSplatHeights.Add(splatHeights[0]);//add at least 1
+        }
+        splatHeights = keptSplatHeights;
+    }
+
+    public void SplatMaps()
+    {
+        TerrainLayer[] newSplatPrototypes;
+        newSplatPrototypes = new TerrainLayer[splatHeights.Count];
+        int splatIndex = 0;
+        foreach (var sh in splatHeights)
+        {
+            newSplatPrototypes[splatIndex] = new TerrainLayer();
+            newSplatPrototypes[splatIndex].diffuseTexture = sh.texture;
+            newSplatPrototypes[splatIndex].tileOffset = sh.tileOffset;
+            newSplatPrototypes[splatIndex].tileSize = sh.tileSize;
+            newSplatPrototypes[splatIndex].diffuseTexture.Apply(true);
+
+            splatIndex++;
+        }
+        terrainData.terrainLayers = newSplatPrototypes;
     }
 
     public void Smooth()
