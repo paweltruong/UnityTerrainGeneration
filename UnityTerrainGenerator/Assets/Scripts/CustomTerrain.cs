@@ -50,6 +50,11 @@ public class CustomTerrain : MonoBehaviour
         public float maxHeight = 0.2f;
         public Vector2 tileOffset = Vector2.zero;
         public Vector2 tileSize = new Vector2(50, 50);
+        public bool overrideGlobalBlendSettings = false;
+        public float splatBlendBaseOffset = 0f;
+        public float splatBlendNoiseXOffset = 0.01f;
+        public float splatBlendNoiseYOffset = 0.01f;
+        public float splatBlendNoiseScaler = 0.01f;
         public bool remove = false;
     }
     public List<SplatHeights> splatHeights = new List<SplatHeights>() { new SplatHeights() };
@@ -154,6 +159,13 @@ public class CustomTerrain : MonoBehaviour
                     //add some jitteriness to offset
                     float noise = Mathf.PerlinNoise(x * splatBlendNoiseXOffset, y * splatBlendNoiseYOffset) * splatBlendNoiseScaler;
                     float blendOffset = splatBlendBaseOffset + noise;
+
+                    if (splatHeights[i].overrideGlobalBlendSettings)
+                    {
+                        noise = Mathf.PerlinNoise(x * splatHeights[i].splatBlendNoiseXOffset,
+                            y * splatHeights[i].splatBlendNoiseYOffset) * splatHeights[i].splatBlendNoiseScaler;
+                        blendOffset = splatHeights[i].splatBlendBaseOffset + noise;
+                    }
 
                     float thisHeightStart = splatHeights[i].minHeight - blendOffset;
                     float thisHeightStop = splatHeights[i].maxHeight + blendOffset;
