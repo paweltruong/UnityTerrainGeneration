@@ -60,13 +60,15 @@ public class CustomTerrain : MonoBehaviour
     public float MPDheightDampenerPower = 2.0f;
     public float MPDroughness = 2.0f;
 
+    //Smooth
+    public float smoothPower = 10f;
 
     public Terrain terrain;
     public TerrainData terrainData;
 
-    float[,] GetHeightMap()
+    float[,] GetHeightMap(bool ignoreResetTerrain = false)
     {
-        if (!resetTerrain)
+        if (!resetTerrain || ignoreResetTerrain)
         {
             return terrainData.GetHeights(0, 0, terrainData.heightmapResolution, terrainData.heightmapResolution);
         }
@@ -74,6 +76,56 @@ public class CustomTerrain : MonoBehaviour
         {
             return new float[terrainData.heightmapResolution, terrainData.heightmapResolution];
         }
+    }
+
+    public void Smooth()
+    {
+        var heightMap = GetHeightMap(true);
+        float smoothProgress = 0;
+        EditorUtility.DisplayProgressBar("Smoothing Terrain", "Progress", smoothProgress);
+
+        for (int i = 0; i < smoothPower; ++i)
+        {
+            for (int y = 0; y < terrainData.heightmapResolution; y++)
+            {
+                for (int x = 0; x < terrainData.heightmapResolution; x++)
+                {
+                    float averageHeight = heightMap[x, y];
+
+                    var neighbours = GenereateNeighbours(new Vector2(x, y),
+                        terrainData.heightmapResolution, terrainData.heightmapResolution);
+
+                    foreach (var n in neighbours)
+                    {
+                        averageHeight += heightMap[(int)n.x, (int)n.y];
+                    }
+
+                    heightMap[x, y] = averageHeight / ((float)neighbours.Count + 1);
+                }
+            }
+            smoothProgress++;
+            EditorUtility.DisplayProgressBar("Smoothing Terrain", "Progress", smoothProgress / smoothPower);
+        }
+        terrainData.SetHeights(0, 0, heightMap);
+        EditorUtility.ClearProgressBar();
+    }
+
+    List<Vector2> GenereateNeighbours(Vector2 pos, int width, int height)
+    {
+        var neighbours = new List<Vector2>();
+        for (int y = -1; y < 2; y++)
+        {
+            for (int x = -1; x < 2; x++)
+            {
+                if (!(x == 0 && y == 0))
+                {
+                    Vector2 nPos = new Vector2(Mathf.Clamp(pos.x + x, 0, width - 1), Mathf.Clamp(pos.y + y, 0, height - 1));
+                    if (!neighbours.Contains(nPos))
+                        neighbours.Add(nPos);
+                }
+            }
+        }
+        return neighbours;
     }
 
     public void MidPointDisplacement()

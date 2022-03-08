@@ -263,6 +263,11 @@ MonoBehaviour:
   voronoiMaxHeight: 0.23
   voronoiPeaks: 3
   voronoiType: 2
+  MPDheightMin: -2
+  MPDheightMax: 2
+  MPDheightDampenerPower: 2
+  MPDroughness: 2
+  smoothPower: 20
   terrain: {fileID: 902963173}
   terrainData: {fileID: 15600000, guid: 44a99bbf6c5b78949bfa8943a8f8ac9a, type: 2}
 --- !u!154 &902963172

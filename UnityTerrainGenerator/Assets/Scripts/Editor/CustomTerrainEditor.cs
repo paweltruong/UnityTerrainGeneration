@@ -5,7 +5,8 @@ using EditorGUITable;
 [CustomEditor(typeof(CustomTerrain))]
 [CanEditMultipleObjects]
 
-public class CustomTerrainEditor : Editor {
+public class CustomTerrainEditor : Editor
+{
 
     //properties -----------
     SerializedProperty randomHeightRange;
@@ -33,6 +34,8 @@ public class CustomTerrainEditor : Editor {
     SerializedProperty MPDheightDampenerPower;
     SerializedProperty MPDroughness;
 
+    SerializedProperty smoothPower;
+
     GUITableState perlinParameterTable;
     SerializedProperty perlinParameters;
 
@@ -44,6 +47,7 @@ public class CustomTerrainEditor : Editor {
     bool showMultiplePerlin = false;
     bool showVoronoi = false;
     bool showMidPointDisplacement = false;
+    bool showSmoothTerrain = false;
 
     void OnEnable()
     {
@@ -73,6 +77,8 @@ public class CustomTerrainEditor : Editor {
         MPDheightMax = serializedObject.FindProperty("MPDheightMax");
         MPDheightDampenerPower = serializedObject.FindProperty("MPDheightDampenerPower");
         MPDroughness = serializedObject.FindProperty("MPDroughness");
+
+        smoothPower = serializedObject.FindProperty("smoothPower");
     }
 
 
@@ -80,7 +86,7 @@ public class CustomTerrainEditor : Editor {
     {
         serializedObject.Update();
 
-        CustomTerrain terrain = (CustomTerrain) target;
+        CustomTerrain terrain = (CustomTerrain)target;
         EditorGUILayout.PropertyField(resetTerrain);
 
         showRandom = EditorGUILayout.Foldout(showRandom, "Random");
@@ -112,7 +118,7 @@ public class CustomTerrainEditor : Editor {
         showPerlinNoise = EditorGUILayout.Foldout(showPerlinNoise, "Single Perlin Noise");
         if (showPerlinNoise)
         {
-            EditorGUILayout.LabelField("",GUI.skin.horizontalSlider);
+            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             GUILayout.Label("Perlin Noise", EditorStyles.boldLabel);
             EditorGUILayout.Slider(perlinXScale, 0, .02f, new GUIContent("X Scale"));
             EditorGUILayout.Slider(perlinYScale, 0, .02f, new GUIContent("Y Scale"));
@@ -147,7 +153,7 @@ public class CustomTerrainEditor : Editor {
                 terrain.RemovePerlin();
             }
             EditorGUILayout.EndHorizontal();
-            if(GUILayout.Button("Apply Multiple Perlin"))
+            if (GUILayout.Button("Apply Multiple Perlin"))
             {
                 terrain.MultiplePerlinTerrain();
             }
@@ -187,6 +193,17 @@ public class CustomTerrainEditor : Editor {
             }
         }
 
+        //Show SmoothTerrain
+        showSmoothTerrain = EditorGUILayout.Foldout(showSmoothTerrain, "Smooth Terrain");
+        if (showSmoothTerrain)
+        {
+            EditorGUILayout.Slider(smoothPower, 1, 100, new GUIContent("SmoothPower"));
+            if (GUILayout.Button("Smooth"))
+            {
+                terrain.Smooth();
+            }
+        }
+
         EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
         if (GUILayout.Button("Reset Terrain"))
         {
@@ -197,12 +214,14 @@ public class CustomTerrainEditor : Editor {
     }
 
     // Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    void Start()
+    {
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 }
