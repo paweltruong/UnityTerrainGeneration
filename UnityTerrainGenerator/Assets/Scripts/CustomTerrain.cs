@@ -54,6 +54,12 @@ public class CustomTerrain : MonoBehaviour
     }
     public VoronoiType voronoiType = VoronoiType.Linear;
 
+    //Midpoint Displacement
+    public float MPDheightMin = -2f;
+    public float MPDheightMax = 2f;
+    public float MPDheightDampenerPower = 2.0f;
+    public float MPDroughness = 2.0f;
+
 
     public Terrain terrain;
     public TerrainData terrainData;
@@ -75,13 +81,14 @@ public class CustomTerrain : MonoBehaviour
         var heightMap = GetHeightMap();
         int width = terrainData.heightmapResolution - 1;
         int squareSize = width;
-        float height = (float)squareSize / 2.0f * 0.01f;
-        float roughness = 2.0f;
-        float heightDampener = (float)Mathf.Pow(2, -1 * roughness);
+        float heightMin = MPDheightMin;
+        float heightMax = MPDheightMax;
+        float heightDampener = (float)Mathf.Pow(MPDheightDampenerPower, -1 * MPDroughness);
 
         int cornerX, cornerY;
         int midX, midY;
-        int pMidXL, pMidXR, pMidYU, pMidYd;
+        int pMidXL, pMidXR, pMidYU, pMidYD;
+
 
         heightMap[0, 0] = UnityEngine.Random.Range(0f, 0.2f);
         heightMap[0, terrainData.alphamapHeight - 2] = UnityEngine.Random.Range(0f, 0.2f);
@@ -99,19 +106,74 @@ public class CustomTerrain : MonoBehaviour
                     midX = (int)(x + squareSize / 2f);
                     midY = (int)(y + squareSize / 2f);
 
-                    heightMap[midX, midY] = 
-                        (heightMap[x, y]
-                        + heightMap[cornerX, y]
-                        + heightMap[x, cornerY]
-                        + heightMap[cornerX, cornerY]) / 4f +
-                        UnityEngine.Random.Range(-height, height);
+                    heightMap[midX, midY] = (float)(
+                        (heightMap[x, y] + heightMap[cornerX, y] + heightMap[x, cornerY] + heightMap[cornerX, cornerY]) / 4.0f
+                        + UnityEngine.Random.Range(heightMin, heightMax));
                 }
             }
+
+            for (int x = 0; x < width; x += squareSize)
+            {
+                for (int y = 0; y < width; y += squareSize)
+                {
+                    cornerX = x + squareSize;
+                    cornerY = y + squareSize;
+                    midX = (int)(x + squareSize / 2f);
+                    midY = (int)(y + squareSize / 2f);
+
+                    pMidXR = (int)(midX + squareSize);
+                    pMidYU = (int)(midY + squareSize);
+                    pMidXL = (int)(midX - squareSize);
+                    pMidYD = (int)(midY - squareSize);
+
+                    if (pMidXL <= 0 || pMidYD <= 0 || pMidXR >= width - 1 || pMidYU >= width - 1) continue;
+
+                    //left
+                    heightMap[midX, y] = CalculateMidPointHeight(
+                        left: heightMap[pMidXL, midY],
+                        top: heightMap[x, cornerY],
+                        right: heightMap[midX, midY],
+                        bottom: heightMap[x, y],
+                        heightMin: heightMin,
+                        heightMax: heightMax);
+                    //top
+                    heightMap[midX, cornerY] = CalculateMidPointHeight(
+                        left: heightMap[x, cornerY],
+                        top: heightMap[midX, pMidYU],
+                        right: heightMap[cornerX, cornerY],
+                        bottom: heightMap[midX, midY],
+                        heightMin: heightMin,
+                        heightMax: heightMax);
+                    //right
+                    heightMap[cornerX, midY] = CalculateMidPointHeight(
+                        left: heightMap[midX, midY],
+                        top: heightMap[cornerX, cornerY],
+                        right: heightMap[pMidXR, midY],
+                        bottom: heightMap[cornerX, y],
+                        heightMin: heightMin,
+                        heightMax: heightMax);
+                    //bottom
+                    heightMap[midX, y] = CalculateMidPointHeight(
+                        left: heightMap[x, y],
+                        top: heightMap[midX, midY],
+                        right: heightMap[cornerX, y],
+                        bottom: heightMap[midX, pMidYD],
+                        heightMin: heightMin,
+                        heightMax: heightMax);
+                }
+            }
+
             squareSize = (int)(squareSize / 2.0f);
-            height *= heightDampener;
+            heightMin *= heightDampener;
+            heightMax *= heightDampener;
         }
 
         terrainData.SetHeights(0, 0, heightMap);
+    }
+
+    float CalculateMidPointHeight(float left, float top, float right, float bottom, float heightMin, float heightMax)
+    {
+        return (left + top + right + bottom) / 4f + UnityEngine.Random.Range(heightMin, heightMax);
     }
 
     public void Voronoi()
