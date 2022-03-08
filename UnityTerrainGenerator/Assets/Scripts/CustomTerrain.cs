@@ -48,6 +48,8 @@ public class CustomTerrain : MonoBehaviour
         public Texture2D texture = null;
         public float minHeight = 0.1f;
         public float maxHeight = 0.2f;
+        public float minSlope = 0;
+        public float maxSlope = 1.5f;
         public Vector2 tileOffset = Vector2.zero;
         public Vector2 tileSize = new Vector2(50, 50);
         public bool overrideGlobalBlendSettings = false;
@@ -123,6 +125,24 @@ public class CustomTerrain : MonoBehaviour
         splatHeights = keptSplatHeights;
     }
 
+    float GetSteepness(float[,] heightmap, int x, int y, int width, int height)
+    {
+        //Sobel Edge Detection
+        float h = heightmap[x, y];
+        int nx = x + 1;
+        int ny = y + 1;
+
+        //if on the upper edge of the map find gradient by going backward
+        if (nx > width - 1) nx = x - 1;
+        if (ny > height - 1) ny = y - 1;
+
+        float dx = heightmap[nx, y] - h;
+        float dy = heightmap[x, ny] - h;
+        Vector2 gradient = new Vector2(dx, dy);
+        float steep = gradient.magnitude;
+        return steep;
+    }
+
     public void SplatMaps()
     {
         //Create terrain brushes
@@ -156,10 +176,11 @@ public class CustomTerrain : MonoBehaviour
                 float[] splat = new float[terrainData.alphamapLayers];
                 for (int i = 0; i < splatHeights.Count; ++i)
                 {
-                    //add some jitteriness to offset
+                    //set global blend
                     float noise = Mathf.PerlinNoise(x * splatBlendNoiseXOffset, y * splatBlendNoiseYOffset) * splatBlendNoiseScaler;
                     float blendOffset = splatBlendBaseOffset + noise;
 
+                    //set custom blend
                     if (splatHeights[i].overrideGlobalBlendSettings)
                     {
                         noise = Mathf.PerlinNoise(x * splatHeights[i].splatBlendNoiseXOffset,
@@ -169,7 +190,14 @@ public class CustomTerrain : MonoBehaviour
 
                     float thisHeightStart = splatHeights[i].minHeight - blendOffset;
                     float thisHeightStop = splatHeights[i].maxHeight + blendOffset;
-                    if (heightMap[x, y] >= thisHeightStart && heightMap[x, y] <= thisHeightStop)
+
+                    float steepness = GetSteepness(heightMap, x, y, terrainData.heightmapResolution, terrainData.heightmapResolution);
+                    bool isSplatSteepnessValid = steepness >= splatHeights[i].minSlope 
+                        && steepness <= splatHeights[i].maxSlope;
+
+
+                    if (heightMap[x, y] >= thisHeightStart && heightMap[x, y] <= thisHeightStop
+                        && isSplatSteepnessValid)
                     {
                         splat[i] = 1;
                     }
