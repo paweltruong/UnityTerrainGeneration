@@ -53,6 +53,10 @@ public class CustomTerrain : MonoBehaviour
         public bool remove = false;
     }
     public List<SplatHeights> splatHeights = new List<SplatHeights>() { new SplatHeights() };
+    public float splatBlendBaseOffset = 0f;
+    public float splatBlendNoiseXOffset = 0.01f;
+    public float splatBlendNoiseYOffset = 0.01f;
+    public float splatBlendNoiseScaler = 0.01f;
 
     //Voronoi
     public float voronoiFallOff = 0.2f;
@@ -147,9 +151,12 @@ public class CustomTerrain : MonoBehaviour
                 float[] splat = new float[terrainData.alphamapLayers];
                 for (int i = 0; i < splatHeights.Count; ++i)
                 {
-                    float offset = 0.01f;
-                    float thisHeightStart = splatHeights[i].minHeight - offset;
-                    float thisHeightStop = splatHeights[i].maxHeight + offset;
+                    //add some jitteriness to offset
+                    float noise = Mathf.PerlinNoise(x * splatBlendNoiseXOffset, y * splatBlendNoiseYOffset) * splatBlendNoiseScaler;
+                    float blendOffset = splatBlendBaseOffset + noise;
+
+                    float thisHeightStart = splatHeights[i].minHeight - blendOffset;
+                    float thisHeightStop = splatHeights[i].maxHeight + blendOffset;
                     if (heightMap[x, y] >= thisHeightStart && heightMap[x, y] <= thisHeightStop)
                     {
                         splat[i] = 1;

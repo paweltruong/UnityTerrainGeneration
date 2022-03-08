@@ -38,6 +38,10 @@ public class CustomTerrainEditor : Editor
 
     GUITableState splatMapTable;
     SerializedProperty splatHeights;
+    SerializedProperty splatBlendBaseOffset;
+    SerializedProperty splatBlendNoiseXOffset;
+    SerializedProperty splatBlendNoiseYOffset;
+    SerializedProperty splatBlendNoiseScaler;
 
     GUITableState perlinParameterTable;
     SerializedProperty perlinParameters;
@@ -86,6 +90,10 @@ public class CustomTerrainEditor : Editor
 
         splatMapTable = new GUITableState("splatMapTable");
         splatHeights = serializedObject.FindProperty("splatHeights");
+        splatBlendBaseOffset = serializedObject.FindProperty("splatBlendBaseOffset");
+        splatBlendNoiseXOffset = serializedObject.FindProperty("splatBlendNoiseXOffset");
+        splatBlendNoiseYOffset = serializedObject.FindProperty("splatBlendNoiseYOffset");
+        splatBlendNoiseScaler = serializedObject.FindProperty("splatBlendNoiseScaler");
     }
 
 
@@ -204,6 +212,11 @@ public class CustomTerrainEditor : Editor
         showSplatMaps = EditorGUILayout.Foldout(showSplatMaps, "Splat Maps");
         if (showSplatMaps)
         {
+            EditorGUILayout.Slider(splatBlendBaseOffset, 0, 1, new GUIContent("BlendBaseOffset"));
+            EditorGUILayout.Slider(splatBlendNoiseXOffset, 0, 1, new GUIContent("BlendNoiseXOffset"));
+            EditorGUILayout.Slider(splatBlendNoiseYOffset, 0, 1, new GUIContent("BlendNoiseYOffset"));
+            EditorGUILayout.Slider(splatBlendNoiseScaler, 0, 1, new GUIContent("BlendNoiseScaler"));
+
             EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
             GUILayout.Label("Splat Maps", EditorStyles.boldLabel);
             splatMapTable = GUITableLayout.DrawTable(splatMapTable,

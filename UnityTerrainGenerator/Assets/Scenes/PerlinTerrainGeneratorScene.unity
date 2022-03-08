@@ -288,6 +288,10 @@ MonoBehaviour:
     tileOffset: {x: 0, y: 0}
     tileSize: {x: 50, y: 50}
     remove: 0
+  splatBlendBaseOffset: 0
+  splatBlendNoiseXOffset: 0.01
+  splatBlendNoiseYOffset: 0.01
+  splatBlendNoiseScaler: 0.01
   voronoiFallOff: 0.02
   voronoiDropOff: 0.6
   voronoiMinHeight: 0.07
