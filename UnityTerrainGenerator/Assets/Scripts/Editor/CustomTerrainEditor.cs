@@ -57,6 +57,8 @@ public class CustomTerrainEditor : Editor
     bool showSmoothTerrain = false;
     bool showSplatMaps = false;
 
+    Vector2 scrollPos;
+
     void OnEnable()
     {
         randomHeightRange = serializedObject.FindProperty("randomHeightRange");
@@ -102,6 +104,13 @@ public class CustomTerrainEditor : Editor
         serializedObject.Update();
 
         CustomTerrain terrain = (CustomTerrain)target;
+
+        //Scrollbar Starting Code
+        Rect r = EditorGUILayout.BeginVertical();
+        scrollPos = EditorGUILayout.BeginScrollView(scrollPos, GUILayout.Width(r.width), GUILayout.Height(r.height));
+        EditorGUI.indentLevel++;
+
+
         EditorGUILayout.PropertyField(resetTerrain);
 
         showRandom = EditorGUILayout.Foldout(showRandom, "Random");
@@ -254,6 +263,11 @@ public class CustomTerrainEditor : Editor
         {
             terrain.ResetTerrain();
         }
+
+
+        //Scrollbar ending code
+        EditorGUILayout.EndScrollView();
+        EditorGUILayout.EndVertical();
 
         serializedObject.ApplyModifiedProperties();
     }
