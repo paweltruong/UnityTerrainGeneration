@@ -47,7 +47,7 @@ public class TextureCreatorWindow : EditorWindow
         perlinHeightScale = EditorGUILayout.Slider("Height Scale", perlinHeightScale, 0, 1);
         perlinOffsetX = EditorGUILayout.IntSlider("Offset X", perlinOffsetX, 0, 10000);
         perlinOffsetY = EditorGUILayout.IntSlider("Offset Y", perlinOffsetY, 0, 10000);
-        alphaToggle = EditorGUILayout.Toggle("Alpha?",alphaToggle);
+        alphaToggle = EditorGUILayout.Toggle("Alpha?", alphaToggle);
         mapToggle = EditorGUILayout.Toggle("Map?", mapToggle);
         seamlessToggle = EditorGUILayout.Toggle("Seamless", seamlessToggle);
 
@@ -63,11 +63,62 @@ public class TextureCreatorWindow : EditorWindow
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    pValue = Utils.fBM((x + perlinOffsetX) * perlinXScale, (y + perlinOffsetY) * perlinYScale,
-                        perlinOctaves,
-                        perlinPersistance) * perlinHeightScale;
+                    if (seamlessToggle)
+                    {
+                        float u = (float)x / (float)w;
+                        float v = (float)y / (float)h;
+
+                        //bottom left tile
+                        float noise00 = Utils.fBM(
+                            (x + perlinOffsetX) * perlinXScale,
+                            (y + perlinOffsetY) * perlinYScale,
+                            perlinOctaves,
+                            perlinPersistance) * perlinHeightScale;
+                        //top left tile
+                        float noise01 = Utils.fBM(
+                            (x + perlinOffsetX) * perlinXScale,
+                            (y + perlinOffsetY + h) * perlinYScale,
+                            perlinOctaves,
+                              perlinPersistance) * perlinHeightScale;
+                        //bottom right tile
+                        float noise10 = Utils.fBM(
+                            (x + perlinOffsetX + w) * perlinXScale,
+                            (y + perlinOffsetY) * perlinYScale,
+                            perlinOctaves,
+                            perlinPersistance) * perlinHeightScale;
+                        //top right tile
+                        float noise11 = Utils.fBM(
+                            (x + perlinOffsetX + w) * perlinXScale,
+                            (y + perlinOffsetY + h) * perlinYScale,
+                            perlinOctaves,
+                            perlinPersistance) * perlinHeightScale;
+
+                        float noiseTotal =
+                            u * v * noise00 +
+                            u * (1 - v) * noise01 +
+                            (1 - u) * v * noise10 +
+                            (1 - u) * (1 - v) * noise11;
+
+                        float tileHalfResolution = (textureResolution - 1) / 2;
+                        float offset = 50;//can be random
+                        float value = (int)(tileHalfResolution * noiseTotal) + offset;
+                        float r = Mathf.Clamp((int)noise00, 0, 255);
+                        float g = Mathf.Clamp((int)value, 0, 255);
+                        float b = Mathf.Clamp((int)value + offset, 0, 255);
+                        float a = Mathf.Clamp((int)noise00 + offset * 2, 0, 255);
+
+                        pValue = (r + g + b) / (3 * 255.0f);//greyscale
+                    }
+                    else
+                    {
+                        pValue = Utils.fBM((x + perlinOffsetX) * perlinXScale, (y + perlinOffsetY) * perlinYScale,
+                            perlinOctaves,
+                            perlinPersistance) * perlinHeightScale;
+                    }
+
+
                     float colValue = pValue;
-                    pixCol = new Color(colValue, colValue, colValue, alphaToggle? colValue : 1);
+                    pixCol = new Color(colValue, colValue, colValue, alphaToggle ? colValue : 1);
                     pTexture.SetPixel(x, y, pixCol);
                 }
                 pTexture.Apply(false, false);
