@@ -262,7 +262,7 @@ MonoBehaviour:
     minHeight: 0.05
     maxHeight: 0.1
     minSlope: 0
-    maxSlope: 0.005
+    maxSlope: 50
     tileOffset: {x: 0, y: 0}
     tileSize: {x: 50, y: 50}
     overrideGlobalBlendSettings: 1
@@ -275,7 +275,7 @@ MonoBehaviour:
     minHeight: 0.1
     maxHeight: 0.5
     minSlope: 0
-    maxSlope: 1.5
+    maxSlope: 90
     tileOffset: {x: 0, y: 0}
     tileSize: {x: 50, y: 50}
     overrideGlobalBlendSettings: 0
@@ -288,7 +288,7 @@ MonoBehaviour:
     minHeight: 0.5
     maxHeight: 1
     minSlope: 0
-    maxSlope: 1.5
+    maxSlope: 90
     tileOffset: {x: 0, y: 0}
     tileSize: {x: 50, y: 50}
     overrideGlobalBlendSettings: 0
@@ -301,7 +301,7 @@ MonoBehaviour:
     minHeight: 0.01
     maxHeight: 0.05
     minSlope: 0
-    maxSlope: 1.5
+    maxSlope: 90
     tileOffset: {x: 0, y: 0}
     tileSize: {x: 50, y: 50}
     overrideGlobalBlendSettings: 0
@@ -314,7 +314,7 @@ MonoBehaviour:
     minHeight: 0
     maxHeight: 0.01
     minSlope: 0
-    maxSlope: 1.5
+    maxSlope: 90
     tileOffset: {x: 0, y: 0}
     tileSize: {x: 50, y: 50}
     overrideGlobalBlendSettings: 0
@@ -326,8 +326,8 @@ MonoBehaviour:
   - texture: {fileID: 2800000, guid: 79d5431cd68194d08a40d2bbe4ebcef9, type: 3}
     minHeight: 0.05
     maxHeight: 0.2
-    minSlope: 0.005
-    maxSlope: 1.5
+    minSlope: 50
+    maxSlope: 90
     tileOffset: {x: 0, y: 0}
     tileSize: {x: 50, y: 50}
     overrideGlobalBlendSettings: 0

@@ -191,10 +191,15 @@ public class CustomTerrain : MonoBehaviour
                     float thisHeightStart = splatHeights[i].minHeight - blendOffset;
                     float thisHeightStop = splatHeights[i].maxHeight + blendOffset;
 
-                    float steepness = GetSteepness(heightMap, x, y, terrainData.heightmapResolution, terrainData.heightmapResolution);
-                    bool isSplatSteepnessValid = steepness >= splatHeights[i].minSlope 
-                        && steepness <= splatHeights[i].maxSlope;
+                    //Sobel
+                    //float steepness = GetSteepness(heightMap, x, y, terrainData.heightmapResolution, terrainData.heightmapResolution);
+                    
+                    //normalized (0,1) and need to swap x and y because unity alpha map x,y are rotated 90 degrees (behaves differently on heightmaps and splatmaps in unity)
+                    float steepness = terrainData.GetSteepness(y / (float)terrainData.alphamapHeight,
+                        x / (float)terrainData.alphamapWidth);
 
+                    bool isSplatSteepnessValid = steepness >= splatHeights[i].minSlope
+                        && steepness <= splatHeights[i].maxSlope;
 
                     if (heightMap[x, y] >= thisHeightStart && heightMap[x, y] <= thisHeightStop
                         && isSplatSteepnessValid)
