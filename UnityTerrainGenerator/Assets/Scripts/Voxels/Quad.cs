@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Quad
 {
-    public Mesh Build(Block.BlockSide side, Vector3 offset)
-    {
-        Mesh mesh;
+    public Mesh mesh;
 
+    public Quad( Block.BlockSide side, Vector3 offset)
+    {
         mesh = new Mesh();
         mesh.name = "ScriptedQuad";
 
@@ -83,7 +83,5 @@ public class Quad
         mesh.triangles = triangles;
 
         mesh.RecalculateBounds();
-
-        return mesh;
     }
 }
