@@ -5,15 +5,20 @@ using UnityEngine;
 public class WorldController : MonoBehaviour
 {
     public GameObject block;
-    public int worldSize = 2;
+    public int width = 1;
+    public int height = 1;
+    public int depth = 1;
 
     public IEnumerator BuildWorld()
     {
-        for (int z = 0; z < worldSize; z++)
-            for (int y = 0; y < worldSize; y++)
+        for (int z = 0; z < depth; z++)
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < worldSize; x++)
+                for (int x = 0; x < width; x++)
                 {
+                    //Randomly create holes on top two levels
+                    if (y >= height - 2 && Random.Range(0, 100) < 50) continue;
+
                     Vector3 pos = new Vector3(x, y, z);
                     GameObject cube = GameObject.Instantiate(block, pos, Quaternion.identity);
                     cube.name = $"{x}_{y}_{z}";

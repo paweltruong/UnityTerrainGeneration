@@ -354,7 +354,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   block: {fileID: 5701812716215194108, guid: b4e35a27a653fb34ab26b9e9d8035e59, type: 3}
-  worldSize: 2
+  width: 10
+  height: 5
+  depth: 10
 --- !u!4 &1503309819
 Transform:
   m_ObjectHideFlags: 0
