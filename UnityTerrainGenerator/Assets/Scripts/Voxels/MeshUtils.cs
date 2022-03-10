@@ -6,6 +6,27 @@ using VertexData = System.Tuple<UnityEngine.Vector3, UnityEngine.Vector3, UnityE
 
 public static class MeshUtils
 {
+    [System.Serializable]
+    public enum BlockType
+    {
+        GRASSTOP, GRASSSIDE, DIRT, WATER, STONE, SAND
+    }
+
+    public static Vector2[,] blockUVs = {
+        /*GRASSTOP*/
+        { new Vector2(0.125f, .375f), new Vector2(.1875f,.375f), new Vector2(.125f, .4375f), new Vector2(.1875f, .475f) },
+        /*GRASSSIDE*/
+        { new Vector2(0.1875f, .9375f), new Vector2(.25f,.9375f), new Vector2(.1875f, 1), new Vector2(.25f,1) },
+        /*DIRT*/
+        { new Vector2(0.125f, .9375f), new Vector2(.1875f,.9375f), new Vector2(.125f, 1), new Vector2(.1875f, 1) },
+        /*WATER*/
+        { new Vector2(0.875f, .125f), new Vector2(.9375f,.125f), new Vector2(.875f, .1875f), new Vector2(.9375f, .1875f) },
+        /*STONE*/
+        { new Vector2(0, .875f), new Vector2(.0625f,.875f), new Vector2(0, .9375f), new Vector2(.0625f, .9375f) },
+        /*SAND*/
+        { new Vector2(0.125f, .875f), new Vector2(.1875f,.875f), new Vector2(.125f, .9375f), new Vector2(.1875f, .9375f) }
+    };
+
     public static Mesh MergeMeshes(Mesh[] meshes)
     {
         Mesh mesh = new Mesh();
@@ -46,7 +67,7 @@ public static class MeshUtils
 
                 int index;
                 //add to global triangle vertex index list
-                if(pointsOrder.TryGetValue(p, out index))
+                if (pointsOrder.TryGetValue(p, out index))
                     tris.Add(index);
             }
             meshes[i] = null;
