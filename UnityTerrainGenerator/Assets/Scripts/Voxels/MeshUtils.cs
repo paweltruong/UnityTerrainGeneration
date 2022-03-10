@@ -11,6 +11,9 @@ public static class MeshUtils
     {
         GRASSTOP, GRASSSIDE, DIRT, WATER, STONE, SAND
     }
+    [System.Serializable]
+    public enum BlockSide { BOTTOM, TOP, LEFT, RIGHT, FRONT, BACK };
+
 
     public static Vector2[,] blockUVs = {
         /*GRASSTOP*/

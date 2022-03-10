@@ -2,28 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Block : MonoBehaviour
+public class Block
 {
-    [System.Serializable]
-    public enum BlockSide { BOTTOM, TOP, LEFT, RIGHT, FRONT, BACK };
+    public Mesh mesh;
 
-    public Material atlas;
-
-    void Start()
-    {
-        MeshFilter mf = this.gameObject.AddComponent<MeshFilter>();
-        MeshRenderer mr = this.gameObject.AddComponent<MeshRenderer>();
-        mr.material = atlas;
-
-        var offset = Vector3.zero;
-
+    public Block(Vector3 offset, MeshUtils.BlockType blockType)
+    {    
         Quad[] quads = new Quad[6];
-        quads[0] = new Quad(BlockSide.BOTTOM, offset, MeshUtils.BlockType.SAND);
-        quads[1] = new Quad(BlockSide.TOP, offset, MeshUtils.BlockType.SAND);
-        quads[2] = new Quad(BlockSide.LEFT, offset, MeshUtils.BlockType.SAND);
-        quads[3] = new Quad(BlockSide.RIGHT, offset, MeshUtils.BlockType.SAND);
-        quads[4] = new Quad(BlockSide.FRONT, offset, MeshUtils.BlockType.SAND);
-        quads[5] = new Quad(BlockSide.BACK, offset, MeshUtils.BlockType.SAND);
+        quads[0] = new Quad(MeshUtils.BlockSide.BOTTOM, offset, blockType);
+        quads[1] = new Quad(MeshUtils.BlockSide.TOP, offset, blockType);
+        quads[2] = new Quad(MeshUtils.BlockSide.LEFT, offset, blockType);
+        quads[3] = new Quad(MeshUtils.BlockSide.RIGHT, offset, blockType);
+        quads[4] = new Quad(MeshUtils.BlockSide.FRONT, offset, blockType);
+        quads[5] = new Quad(MeshUtils.BlockSide.BACK, offset, blockType);
 
         Mesh[] sideMeshes = new Mesh[6];
         for (int i = 0; i < quads.Length; ++i)
@@ -31,13 +22,7 @@ public class Block : MonoBehaviour
             sideMeshes[i] = quads[i].mesh;
         }
 
-        mf.mesh = MeshUtils.MergeMeshes(sideMeshes);
-        mf.mesh.name = $"Cube_{offset.x}_{offset.y}_{offset.z}";
-    }
-
-
-    void Update()
-    {
-
+        mesh = MeshUtils.MergeMeshes(sideMeshes);
+        mesh.name = $"Cube_{offset.x}_{offset.y}_{offset.z}";
     }
 }
