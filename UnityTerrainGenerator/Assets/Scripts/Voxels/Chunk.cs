@@ -22,9 +22,12 @@ public class Chunk : MonoBehaviour
     {
         int blockCount = width * height * depth;
         chunkData = new MeshUtils.BlockType[blockCount];
-        for(int i = 0; i < blockCount; ++i) 
+        for (int i = 0; i < blockCount; ++i)
         {
-            chunkData[i] = MeshUtils.BlockType.DIRT;
+            if (UnityEngine.Random.Range(0, 100) < 50)
+                chunkData[i] = MeshUtils.BlockType.AIR;
+            else
+                chunkData[i] = MeshUtils.BlockType.DIRT;
         }
     }
 
@@ -54,7 +57,7 @@ public class Chunk : MonoBehaviour
                     int flatIndex = x + width * (y + depth * z);
                     blocks[x, y, z] = new Block(new Vector3(x, y, z), chunkData[flatIndex], this);
                     if (blocks[x, y, z].mesh == null) continue;//needed after we prevent from drawing meshes that doesnt have solid neighbours                  
-                    
+
                     inputMeshes.Add(blocks[x, y, z].mesh);
                     var vCount = blocks[x, y, z].mesh.vertexCount;
                     var iCount = (int)blocks[x, y, z].mesh.GetIndexCount(0);
@@ -88,14 +91,14 @@ public class Chunk : MonoBehaviour
 
         jobs.outputMesh.subMeshCount = 1;
         jobs.outputMesh.SetSubMesh(0, sm);
-        
+
         Mesh.ApplyAndDisposeWritableMeshData(outputMeshData, new[] { newMesh });
         jobs.meshData.Dispose();
         jobs.vertexStart.Dispose();
         jobs.triStart.Dispose();
         newMesh.RecalculateBounds();
 
-        mf.mesh = newMesh; 
+        mf.mesh = newMesh;
     }
 
     [BurstCompile]
@@ -140,7 +143,7 @@ public class Chunk : MonoBehaviour
             var tStart = triStart[index];
             var tCount = data.GetSubMesh(0).indexCount;
             var outputTris = outputMesh.GetIndexData<int>();
-            if(data.indexFormat == IndexFormat.UInt16) 
+            if (data.indexFormat == IndexFormat.UInt16)
             {
                 var tris = data.GetIndexData<ushort>();
                 for (int i = 0; i < tCount; ++i)
