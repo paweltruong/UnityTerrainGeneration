@@ -245,6 +245,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4c6a300107479e4d8ac46feddfbba9a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  atlas: {fileID: 2100000, guid: 83ef44d10da0a5f4b8905b7f2a2cd3b0, type: 2}
 --- !u!4 &1011363691
 Transform:
   m_ObjectHideFlags: 0

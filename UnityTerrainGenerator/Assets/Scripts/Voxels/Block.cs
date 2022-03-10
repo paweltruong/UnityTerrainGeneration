@@ -7,10 +7,13 @@ public class Block : MonoBehaviour
     [System.Serializable]
     public enum BlockSide { BOTTOM, TOP, LEFT, RIGHT, FRONT, BACK };
 
+    public Material atlas;
+
     void Start()
     {
         MeshFilter mf = this.gameObject.AddComponent<MeshFilter>();
         MeshRenderer mr = this.gameObject.AddComponent<MeshRenderer>();
+        mr.material = atlas;
 
         var offset = Vector3.zero;
 
