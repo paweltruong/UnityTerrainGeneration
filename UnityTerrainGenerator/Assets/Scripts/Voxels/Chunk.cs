@@ -1,10 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using Unity.Burst;
-using Unity.Mathematics;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
+using UnityEngine;
 using UnityEngine.Rendering;
 
 public class Chunk : MonoBehaviour
@@ -16,6 +15,18 @@ public class Chunk : MonoBehaviour
     public int depth = 2;
 
     public Block[,,] blocks;
+    //Flat [x + WIDTH * (y + DEPTH * z)] = Original[x,y,z]
+    public MeshUtils.BlockType[] chunkData;
+
+    void BuildChunk()
+    {
+        int blockCount = width * height * depth;
+        chunkData = new MeshUtils.BlockType[blockCount];
+        for(int i = 0; i < blockCount; ++i) 
+        {
+            chunkData[i] = MeshUtils.BlockType.DIRT;
+        }
+    }
 
     void Start()
     {
@@ -23,8 +34,9 @@ public class Chunk : MonoBehaviour
         MeshRenderer mr = this.gameObject.AddComponent<MeshRenderer>();
         mr.material = atlas;
         blocks = new Block[width, height, depth];
+        BuildChunk();
 
-        var inputMeshes = new List<Mesh>(width * height * depth);
+        var inputMeshes = new List<Mesh>();
         int vertexStart = 0;
         int triStart = 0;
         int meshCount = width * height * depth;
@@ -39,7 +51,10 @@ public class Chunk : MonoBehaviour
             {
                 for (int x = 0; x < width; x++)
                 {
-                    blocks[x, y, z] = new Block(new Vector3(x, y, z), MeshUtils.BlockType.DIRT);
+                    int flatIndex = x + width * (y + depth * z);
+                    blocks[x, y, z] = new Block(new Vector3(x, y, z), chunkData[flatIndex], this);
+                    if (blocks[x, y, z].mesh == null) continue;//needed after we prevent from drawing meshes that doesnt have solid neighbours                  
+                    
                     inputMeshes.Add(blocks[x, y, z].mesh);
                     var vCount = blocks[x, y, z].mesh.vertexCount;
                     var iCount = (int)blocks[x, y, z].mesh.GetIndexCount(0);
@@ -62,7 +77,7 @@ public class Chunk : MonoBehaviour
             new VertexAttributeDescriptor(VertexAttribute.TexCoord0, stream: 2)
             );
 
-        var handle = jobs.Schedule(meshCount, 4);
+        var handle = jobs.Schedule(inputMeshes.Count, 4);
         var newMesh = new Mesh();
         newMesh.name = "Chunk";
         var sm = new SubMeshDescriptor(0, triStart, MeshTopology.Triangles);

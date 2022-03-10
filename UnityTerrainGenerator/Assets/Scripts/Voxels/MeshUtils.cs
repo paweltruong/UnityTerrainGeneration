@@ -9,7 +9,7 @@ public static class MeshUtils
     [System.Serializable]
     public enum BlockType
     {
-        GRASSTOP, GRASSSIDE, DIRT, WATER, STONE, SAND
+        GRASSTOP, GRASSSIDE, DIRT, WATER, STONE, SAND, AIR
     }
     [System.Serializable]
     public enum BlockSide { BOTTOM, TOP, LEFT, RIGHT, FRONT, BACK };
