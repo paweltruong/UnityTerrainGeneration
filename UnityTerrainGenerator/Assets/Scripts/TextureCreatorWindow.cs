@@ -15,6 +15,9 @@ public class TextureCreatorWindow : EditorWindow
     float perlinHeightScale = 0.9f;
     int perlinOffsetX = 1000;
     int perlinOffsetY = 200;
+    bool falloffToggle = false;
+    float falloffStart = 0;
+    float falloffEnd = 0;
     bool alphaToggle = false;
     bool seamlessToggle = false;
     bool mapToggle = false;//remap color values, to tweak grayscale
@@ -53,6 +56,10 @@ public class TextureCreatorWindow : EditorWindow
 
         brightness = EditorGUILayout.Slider("Brightness", brightness, 0, 2);
         contrast = EditorGUILayout.Slider("Contrast", contrast, 0, 2);
+
+        falloffToggle = EditorGUILayout.Toggle("Falloff", falloffToggle);
+        falloffStart = EditorGUILayout.Slider("FalloffStart", falloffStart, 0, 1);
+        falloffEnd = EditorGUILayout.Slider("FalloffEnd", falloffEnd, 0, 1);
 
         alphaToggle = EditorGUILayout.Toggle("Alpha?", alphaToggle);
         mapToggle = EditorGUILayout.Toggle("Map?", mapToggle);
@@ -128,7 +135,7 @@ public class TextureCreatorWindow : EditorWindow
                     }
 
 
-                    float colValue = contrast * (pValue -0.5f) + 0.5f * brightness;
+                    float colValue = contrast * (pValue - 0.5f) + 0.5f * brightness;
                     if (minColor > colValue) minColor = colValue;
                     if (maxColor < colValue) maxColor = colValue;
                     pixCol = new Color(colValue, colValue, colValue, alphaToggle ? colValue : 1);
@@ -153,6 +160,11 @@ public class TextureCreatorWindow : EditorWindow
                 }
             }
 
+            if (falloffToggle)
+            {
+                ApplySimpleFallOff(pTexture, new Vector2Int(textureResolution, textureResolution), falloffStart, falloffEnd);
+            }
+
             pTexture.Apply(false, false);
         }
 
@@ -172,10 +184,79 @@ public class TextureCreatorWindow : EditorWindow
         {
             byte[] bytes = pTexture.EncodeToPNG();
             System.IO.Directory.CreateDirectory(Application.dataPath + "/SavedTextures");
-            File.WriteAllBytes(Application.dataPath + "/SavedTextures/" + filename + ".png", bytes);
+            var fullpath = Application.dataPath + "/SavedTextures/" + filename + ".png";
+            File.WriteAllBytes(fullpath, bytes);
+            Debug.Log($"Saved to: {fullpath}");
         }
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
 
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="pTexture"></param>
+    /// <param name="size"></param>
+    /// <param name="falloffStart">in texture coords</param>
+    /// <param name="falloffEnd">in texture coords</param>
+    void ApplySimpleFallOff(Texture2D pTexture, Vector2Int size, float falloffStart, float falloffEnd)
+    {
+
+        for (int y = 0; y < size.y; ++y)
+        {
+            for (int x = 0; x < size.x; ++x)
+            {
+                Vector2 position = new Vector2(
+                    (float)x / size.x * 2 - 1,
+                    (float)y / size.x * 2 - 1
+                    );
+
+                //Find which value is closer to the edge
+                float t = Mathf.Max(Mathf.Abs(position.x), Mathf.Abs(position.y));
+                var originalValue = pTexture.GetPixel(x,y);
+                if (t < falloffStart)
+                {
+                    pTexture.SetPixel(x, y, originalValue);//heightMap[x, y] = 1;
+                }
+                else if (t > falloffEnd)
+                {
+                    pTexture.SetPixel(x, y, FloatToGrayscale(0));//heightMap[x, y] = 0;
+                }
+                else
+                {
+                    pTexture.SetPixel(x, y, FloatToGrayscale(
+                        Mathf.SmoothStep(1, 0, Mathf.InverseLerp(falloffStart, falloffEnd, t * GrayscaleToFloat(originalValue)))
+                        ));
+                    //heightMap[x, y] = Mathf.SmoothStep(1, 0, Mathf.InverseLerp(falloffStart, falloffEnd, t));
+                }
+            }
+        }
+
+        pTexture.Apply(false, false);
+    }
+
+    Color FloatToGrayscale(float colValue, float minColor = 1,
+    float maxColor = 0, bool alphaToggle = false)
+    {
+        var mappedValue = Utils.Map(colValue, minColor, maxColor, 0, 1);
+        var color = new Color(colValue, colValue, colValue, alphaToggle ? colValue : 1);
+        color.r = mappedValue;
+        color.g = mappedValue;
+        color.b = mappedValue;
+        return color;
+    }
+
+
+    float GrayscaleToFloat(Color color, float minColor = 1,
+    float maxColor = 0, bool alphaToggle = false)
+    {
+        if (color.r != color.g && color.g != color.b)
+        {
+            Debug.LogError("Color is not grayscale");
+        }
+
+        var mappedValue = Utils.Map(color.r, minColor, maxColor, 0, 1);
+        return color.r;
     }
 }
