@@ -214,30 +214,42 @@ public class TextureCreatorWindow : EditorWindow
 
                 //Find which value is closer to the edge
                 float t = Mathf.Max(Mathf.Abs(position.x), Mathf.Abs(position.y));
-                var originalValue = pTexture.GetPixel(x,y);
+                var originalValue = pTexture.GetPixel(x, y);
+                float falloffHeightMapValue = 0;
                 if (t < falloffStart)
                 {
-                    pTexture.SetPixel(x, y, originalValue);//heightMap[x, y] = 1;
+                    falloffHeightMapValue = 1;
+                    //pTexture.SetPixel(x, y, originalValue);//heightMap[x, y] = 1;
+                    //pTexture.SetPixel(x, y, originalValue);//heightMap[x, y] = 1;
                 }
                 else if (t > falloffEnd)
                 {
-                    pTexture.SetPixel(x, y, FloatToGrayscale(0));//heightMap[x, y] = 0;
+                    falloffHeightMapValue = 0;
+                    //pTexture.SetPixel(x, y, FloatToGrayscale(0));//heightMap[x, y] = 0;
                 }
                 else
                 {
-                    pTexture.SetPixel(x, y, FloatToGrayscale(
-                        Mathf.SmoothStep(1, 0, Mathf.InverseLerp(falloffStart, falloffEnd, t * GrayscaleToFloat(originalValue)))
-                        ));
+                    //pTexture.SetPixel(x, y, Color.black);
+                    //var lerpValue = Mathf.InverseLerp(falloffStart, falloffEnd, t);
+                    //var step = Mathf.SmoothStep(0, 1, lerpValue);
+                    //pTexture.SetPixel(x, y, FloatToGrayscale(GrayscaleToFloat(originalValue) * step));
+                    //if (x % 4 == 0 && y % 4 == 0)
+                    //    Debug.Log($"X,Y=({x},{y}) T:{t} Lerp:{lerpValue} Step:{step} Col:{FloatToGrayscale(GrayscaleToFloat(originalValue))} FinalC:{FloatToGrayscale(GrayscaleToFloat(originalValue) * step)}");
+                    //pTexture.SetPixel(x, y, FloatToGrayscale(
+                    //    Mathf.SmoothStep(0, GrayscaleToFloat(originalValue), lerpValue)
+                    //    ));
                     //heightMap[x, y] = Mathf.SmoothStep(1, 0, Mathf.InverseLerp(falloffStart, falloffEnd, t));
+                    falloffHeightMapValue = Mathf.SmoothStep(1, 0, Mathf.InverseLerp(falloffStart, falloffEnd, t));
                 }
+                pTexture.SetPixel(x, y, originalValue * falloffHeightMapValue);
             }
         }
 
         pTexture.Apply(false, false);
     }
 
-    Color FloatToGrayscale(float colValue, float minColor = 1,
-    float maxColor = 0, bool alphaToggle = false)
+    Color FloatToGrayscale(float colValue, float minColor = 0,
+    float maxColor = 1, bool alphaToggle = false)
     {
         var mappedValue = Utils.Map(colValue, minColor, maxColor, 0, 1);
         var color = new Color(colValue, colValue, colValue, alphaToggle ? colValue : 1);
@@ -256,7 +268,7 @@ public class TextureCreatorWindow : EditorWindow
             Debug.LogError("Color is not grayscale");
         }
 
-        var mappedValue = Utils.Map(color.r, minColor, maxColor, 0, 1);
+        //var mappedValue = Utils.Map(color.r, minColor, maxColor, 0, 1);
         return color.r;
     }
 }

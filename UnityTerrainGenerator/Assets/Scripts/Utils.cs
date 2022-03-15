@@ -22,6 +22,15 @@ public static class Utils
         return total / maxValue;
     }
 
+    /// <summary>
+    /// https://www.arduino.cc/reference/en/language/functions/math/map/
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="originalMin"></param>
+    /// <param name="originalMax"></param>
+    /// <param name="targetMin"></param>
+    /// <param name="targetMax"></param>
+    /// <returns></returns>
     public static float Map(float value, float originalMin, float originalMax, float targetMin, float targetMax)
     {
         return (value - originalMin) * (targetMax - targetMin) / (originalMax - originalMin) + targetMin;
