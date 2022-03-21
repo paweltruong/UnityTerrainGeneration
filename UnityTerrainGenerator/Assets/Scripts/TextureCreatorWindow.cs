@@ -168,6 +168,56 @@ public class TextureCreatorWindow : EditorWindow
             pTexture.Apply(false, false);
         }
 
+        if (GUILayout.Button("Generate2", GUILayout.Width(wSize)))
+        {
+            int w = textureResolution;
+            int h = textureResolution;
+            float pValue;
+            Color pixCol = Color.white;
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+
+                    pValue = Utils.fBM((x + perlinOffsetX) * perlinXScale, (y + perlinOffsetY) * perlinYScale,
+                            perlinOctaves,
+                            perlinPersistance) * perlinHeightScale;
+
+                    float colValue = pValue;
+
+                    //float colValue = contrast * (pValue - 0.5f) + 0.5f * brightness;
+                    if (minColor > colValue) minColor = colValue;
+                    if (maxColor < colValue) maxColor = colValue;
+                    pixCol = new Color(colValue, colValue, colValue, alphaToggle ? colValue : 1);
+                    pTexture.SetPixel(x, y, pixCol);
+                }
+            }
+
+            if (mapToggle)
+            {
+                for (int y = 0; y < h; ++y)
+                {
+                    for (int x = 0; x < w; ++x)
+                    {
+                        pixCol = pTexture.GetPixel(x, y);
+                        float colValue = pixCol.r;//could be any r,g or b because we have greyscale
+                        colValue = Utils.Map(colValue, minColor, maxColor, 0, 1);
+                        pixCol.r = colValue;
+                        pixCol.g = colValue;
+                        pixCol.b = colValue;
+                        pTexture.SetPixel(x, y, pixCol);
+                    }
+                }
+            }
+
+            if (falloffToggle)
+            {
+                ApplySimpleFallOff(pTexture, new Vector2Int(textureResolution, textureResolution), falloffStart, falloffEnd);
+            }
+
+            pTexture.Apply(false, false);
+        }
+
 
         GUILayout.FlexibleSpace();
         GUILayout.EndHorizontal();
